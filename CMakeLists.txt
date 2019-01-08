@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-set(CMAKE_FILES ${CMAKE_SOURCE_DIR}/../cmake)
+set(CMAKE_FILES ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_TOOLCHAIN_FILE    ${CMAKE_FILES}/toolchain-gcc-arm-embedded.cmake)
 
-project(Smart-Reflower)
+project(Smart_Reflower)
 
 include(${CMAKE_FILES}/CPM_setup.cmake)
 
@@ -12,7 +12,7 @@ include(${CMAKE_FILES}/CPM_setup.cmake)
 # Build settings
 #-----------------------------------------------------------------------
 
-set(EXE_NAME                Smart-Reflower)
+set(EXE_NAME                Smart_Reflower)
 set(FLASH_ADDR              0x00000000)
 set(FLASH_CFG               lpc11uxx)
 set(DEBUG_BREAKPOINT_LIMIT  4)
@@ -110,7 +110,7 @@ ${LINKER_FILES} ${FLAGS_M0}")
 
 
 file(GLOB SOURCES
-"src/*.c",
+"src/*.c"
 "src/usb/*.c"
 )
 
