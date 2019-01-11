@@ -1,5 +1,6 @@
 #include "board.h"
 #include "board_GPIO_ID.h"
+#include <string.h>
 
 #include <chip.h>
 #include <lpc_tools/clock.h>
@@ -9,7 +10,7 @@
 #include <mcu_timing/delay.h>
 
 // max31855 includes
-// #include "MAX31855.h"
+#include "MAX31855.h"
 
 // USB include
 #include "usb_init.h"
@@ -38,16 +39,13 @@ int main(void)
 	const GPIO *led_G = board_get_GPIO(GPIO_ID_LED_G);
 	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
 	const GPIO *buzzer = board_get_GPIO(GPIO_ID_BUZZER);
+	const GPIO *CS1 = board_get_GPIO(GPIO_ID_CS1);
+	const GPIO *CS2 = board_get_GPIO(GPIO_ID_CS2);
 
-
-	//start demo
-	uint32_t prompt = 0, rdCnt = 0;
-	static uint8_t g_rxBuff[256];
+	int prompt = 0;
 
 	while (true)
 	{
-
-		/* Check if host has connected and opened the VCOM port */
 		if ((vcom_connected() != 0) && (prompt == 0))
 		{
 			vcom_write("Jitter Smart-Reflower VCOM.\r\n", 29);
@@ -55,15 +53,9 @@ int main(void)
 		}
 		if (prompt)
 		{
-			rdCnt = vcom_bread(&g_rxBuff[0], 256);
-			if (rdCnt)
-			{
-				g_rxBuff[0] = 'x';
-				vcom_write(&g_rxBuff[0], rdCnt);
-				GPIO_HAL_toggle(led_STATUS);
-			}
+			GeefTemp();
+			delay_us(5E6);
 		}
-		__WFI();
 	}
 	return 0;
 }
