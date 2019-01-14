@@ -79,7 +79,7 @@ void GeefTemp(void)
 	X.SCG = buffer[3] & (1 << 1);
 	X.OC = buffer[3] & (1 << 0);
 
-	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-C= %d,Flag-OC= %d \r\n", X.Temp_ext, X.Temp_int, X.SCV, X.SCG, X.OC);
+	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", X.Temp_ext/4, X.Temp_int/16, X.SCV, X.SCG, X.OC);
 	vcom_write((uint8_t *)waardenX, strlen(waardenX));
 
 	////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ void GeefTemp(void)
 	Y.SCG = buffer[3] & (1 << 1);
 	Y.OC = buffer[3] & (1 << 0);
 
-	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-C= %d,Flag-OC= %d \r\n", Y.Temp_ext, Y.Temp_int, Y.SCV, Y.SCG, Y.OC);
+	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Y.Temp_ext/4, Y.Temp_int/16, Y.SCV, Y.SCG, Y.OC);
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
 	////////////////////////////////////////////////////////

@@ -12,6 +12,9 @@
 // max31855 includes
 #include "MAX31855.h"
 
+// LCD includes
+#include "i2c.h"
+
 // USB include
 #include "usb_init.h"
 #include "usb/cdc_vcom.h"
