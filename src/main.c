@@ -14,6 +14,7 @@
 
 // LCD includes
 #include "i2c.h"
+#include "LCD.h"
 
 // USB include
 #include "usb_init.h"
@@ -37,16 +38,12 @@ int main(void)
 
 	// get the GPIO's
 	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
-	const GPIO *led_R = board_get_GPIO(GPIO_ID_LED_R);
-	const GPIO *led_Y = board_get_GPIO(GPIO_ID_LED_Y);
-	const GPIO *led_G = board_get_GPIO(GPIO_ID_LED_G);
-	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
-	const GPIO *buzzer = board_get_GPIO(GPIO_ID_BUZZER);
-	const GPIO *CS1 = board_get_GPIO(GPIO_ID_CS1);
-	const GPIO *CS2 = board_get_GPIO(GPIO_ID_CS2);
+
+	LCD_begin();
+
+	LCD_write('A');
 
 	int prompt = 0;
-
 	while (true)
 	{
 		if ((vcom_connected() != 0) && (prompt == 0))
@@ -56,6 +53,7 @@ int main(void)
 		}
 		if (prompt)
 		{
+			GPIO_HAL_toggle(led_STATUS);
 			GeefTemp();
 			delay_us(5E6);
 		}

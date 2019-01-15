@@ -39,7 +39,7 @@ static size_t SPI_read_blocking(uint8_t *buffer, size_t sizeof_buffer)
 struct memory_map
 {
 	signed int Temp_ext;
-	signed int Temp_int;
+	signed int Temp_int; // float maken voor de berekening, moet nog wel gekeken worden naar printfunctie, float to string (lpc tools)
 	unsigned int SCV;
 	unsigned int SCG;
 	unsigned int OC;

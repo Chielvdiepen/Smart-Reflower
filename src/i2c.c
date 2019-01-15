@@ -2,6 +2,9 @@
 #include "board.h"
 #include <chip.h>
 
+// Adress of the LCD 0x3F
+static const uint8_t SlaveAddr = 0x3C;
+
 // Initialize the I2C bus
 static void i2c_app_init()
 {
@@ -12,8 +15,6 @@ static void i2c_app_init()
 	Chip_I2C_SetClockRate(I2C0, 100000); //100kHz of 400kHz
 	Chip_I2C_SetMasterEventHandler(I2C0, Chip_I2C_EventHandlerPolling);
 }
-
-int SlaveAddr = 0x3F;
 
 void i2c_init (void)
 {
