@@ -8,6 +8,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include "board.h"
 #include "board_GPIO_ID.h"
+#include <string.h>
 
 static const int HD44780_CHEXECTIME = 2000; // time in us for clear&home
 static const int HD44780_INSEXECTIME = 38;
@@ -15,11 +16,11 @@ static const int HD44780_INSEXECTIME = 38;
 // API return values
 // 0 means successful, less than zero means unsuccessful
 static const int RV_ENOERR = 0;    // no error. Do not change!
-static const int RV_EIO = -1;      // i/o operation failed (generic/default error)
-static const int RV_EINVAL = -2;   // invalid argument/parameter
+// static const int RV_EIO = -1;      // i/o operation failed (generic/default error)
+// static const int RV_EINVAL = -2;   // invalid argument/parameter
 static const int RV_ENOTSUP = -3;  // not supported
-static const int RV_ENXIO = -4;    // no such device or address
-static const int RV_EMSGSIZE = -5; // Message/data too long
+// static const int RV_ENXIO = -4;    // no such device or address
+// static const int RV_EMSGSIZE = -5; // Message/data too long
 
 // commands
 static const uint8_t HD44780_CLEARDISPLAY = 0x01;
@@ -28,6 +29,7 @@ static const uint8_t HD44780_ENTRYMODESET = 0x04;
 static const uint8_t HD44780_DISPLAYCONTROL = 0x08;
 static const uint8_t HD44780_CURDISPSHIFT = 0x10;
 static const uint8_t HD44780_FUNCTIONSET = 0x20;
+// static const uint8_t HD44780_SETCGRAMADDR = 0x40;
 static const uint8_t HD44780_SETDDRAMADDR = 0x80;
 
 // flags for entry mode set;
@@ -53,9 +55,9 @@ static const uint8_t HD44780_MOVELEFT = 0x00;
 static const uint8_t HD44780_8BITMODE = 0x10;
 static const uint8_t HD44780_4BITMODE = 0x00;
 static const uint8_t HD44780_2LINE = 0x08;
-static const uint8_t HD44780_1LINE = 0x00;
-static const uint8_t HD44780_5x10DOTS = 0x04;
-static const uint8_t HD44780_5x8DOTS = 0x00;
+// static const uint8_t HD44780_1LINE = 0x00;
+// static const uint8_t HD44780_5x10DOTS = 0x04;
+// static const uint8_t HD44780_5x8DOTS = 0x00;
 
 // RS signal in HD44780 interface
 // set for data writes, clear for cmds
@@ -161,10 +163,6 @@ int iowrite(enum iotype type, uint8_t value)
 
     i2c_send(txBuffer, sizeof(txBuffer));
 
-    // Wire.beginTransmission();
-    // Wire.write(ctlbyte); // send control byte
-    // Wire.write(value);   // send data/cmd
-
     return (RV_ENOERR);
 }
 
@@ -223,6 +221,10 @@ int LCD_begin()
 
     // Initialize to default text direction (for romance languages)
     _displaymode = HD44780_ENTRYLEFT2RIGHT;
+
+    // Choose to turn on/off linewrapping
+    LCD_lineWrap();
+
     // set the entry mode
     rval = LCD_command(HD44780_ENTRYMODESET | _displaymode);
 
@@ -470,4 +472,14 @@ int LCD_write(uint8_t value)
         }
     }
     return (status);
+}
+
+void LCD_write_string(char *textbuffer)
+{
+    int char_count = strlen(textbuffer);
+    for (int i = 0; i < char_count ; i++)
+    {
+        LCD_write(*textbuffer);
+        textbuffer++;
+    }
 }

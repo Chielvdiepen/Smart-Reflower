@@ -40,8 +40,18 @@ int main(void)
 	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
 
 	LCD_begin();
-
-	LCD_write('A');
+	delay_us(3000000);
+	LCD_blink();
+	///string size///|....................|///string size///
+	LCD_write_string("   Smart-Reflower   ");
+	delay_us(2000000);
+	LCD_write_string("   Smart-Reflower   ");
+	delay_us(3000000);
+	LCD_write_string("   Smart-Reflower   ");
+	delay_us(3000000);
+	LCD_write_string("   Smart-Reflower   ");
+	delay_us(3000000);
+	// LCD_write(255); // block character
 
 	int prompt = 0;
 	while (true)
