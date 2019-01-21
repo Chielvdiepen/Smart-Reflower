@@ -62,7 +62,7 @@ void SPI_init(void)
 struct memory_map X, Y;
 
 // main
-void GeefTemp(void)
+int Meet_Temp(void)
 {
 	uint8_t buffer[4];
 	char waardenX[100], waardenY[100];
@@ -90,15 +90,23 @@ void GeefTemp(void)
 	Y.SCG = buffer[3] & (1 << 1);
 	Y.OC = buffer[3] & (1 << 0);
 
+	//temp conversie
+	signed int Temp_int1 = X.Temp_int / 16;
+	signed int Temp_Ext1 = X.Temp_ext / 4;
+	signed int Temp_int2 = Y.Temp_int / 16;
+	signed int Temp_Ext2 = Y.Temp_ext / 4;
+
+	signed int Temp_out = (Temp_Ext1 + Temp_Ext2)/2;
+
 	//Print data over VCOM
-	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", X.Temp_ext / 4, X.Temp_int / 16, X.SCV, X.SCG, X.OC);
+	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext1, Temp_int1, X.SCV, X.SCG, X.OC);
 	vcom_write((uint8_t *)waardenX, strlen(waardenX));
 
-	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Y.Temp_ext / 4, Y.Temp_int / 16, Y.SCV, Y.SCG, Y.OC);
+	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext2, Temp_int2, Y.SCV, Y.SCG, Y.OC);
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
-	// Bereken board temp
 
+	return Temp_out;
 }
 
 void *_sbrk(int incr)
