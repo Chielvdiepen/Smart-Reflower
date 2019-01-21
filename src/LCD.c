@@ -15,10 +15,10 @@ static const int HD44780_INSEXECTIME = 38;
 
 // API return values
 // 0 means successful, less than zero means unsuccessful
-static const int RV_ENOERR = 0;    // no error. Do not change!
+static const int RV_ENOERR = 0; // no error. Do not change!
 // static const int RV_EIO = -1;      // i/o operation failed (generic/default error)
 // static const int RV_EINVAL = -2;   // invalid argument/parameter
-static const int RV_ENOTSUP = -3;  // not supported
+static const int RV_ENOTSUP = -3; // not supported
 // static const int RV_ENXIO = -4;    // no such device or address
 // static const int RV_EMSGSIZE = -5; // Message/data too long
 
@@ -477,7 +477,7 @@ int LCD_write(uint8_t value)
 void LCD_write_string(char *textbuffer)
 {
     int char_count = strlen(textbuffer);
-    for (int i = 0; i < char_count ; i++)
+    for (int i = 0; i < char_count; i++)
     {
         LCD_write(*textbuffer);
         textbuffer++;

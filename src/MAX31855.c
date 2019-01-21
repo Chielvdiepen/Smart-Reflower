@@ -59,16 +59,16 @@ void SPI_init(void)
 	Chip_SSP_Enable(LPC_SSP0);
 }
 
+struct memory_map X, Y;
+
 // main
 void GeefTemp(void)
 {
 	uint8_t buffer[4];
 	char waardenX[100], waardenY[100];
-	struct memory_map X, Y;
 	SPI_init();
 
-	////////////////////////////////////////////////////////
-
+	// Read out of SPI1, gives temp int,ext and flags
 	SPI1_transfer_begin();
 	SPI_read_blocking(buffer, sizeof(buffer));
 	SPI1_transfer_end();
@@ -79,11 +79,7 @@ void GeefTemp(void)
 	X.SCG = buffer[3] & (1 << 1);
 	X.OC = buffer[3] & (1 << 0);
 
-	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", X.Temp_ext/4, X.Temp_int/16, X.SCV, X.SCG, X.OC);
-	vcom_write((uint8_t *)waardenX, strlen(waardenX));
-
-	////////////////////////////////////////////////////////
-
+	// Read out of SPI1, gives temp int,ext and flags
 	SPI2_transfer_begin();
 	SPI_read_blocking(buffer, sizeof(buffer));
 	SPI2_transfer_end();
@@ -94,10 +90,15 @@ void GeefTemp(void)
 	Y.SCG = buffer[3] & (1 << 1);
 	Y.OC = buffer[3] & (1 << 0);
 
-	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Y.Temp_ext/4, Y.Temp_int/16, Y.SCV, Y.SCG, Y.OC);
+	//Print data over VCOM
+	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", X.Temp_ext / 4, X.Temp_int / 16, X.SCV, X.SCG, X.OC);
+	vcom_write((uint8_t *)waardenX, strlen(waardenX));
+
+	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Y.Temp_ext / 4, Y.Temp_int / 16, Y.SCV, Y.SCG, Y.OC);
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
-	////////////////////////////////////////////////////////
+	// Bereken board temp
+
 }
 
 void *_sbrk(int incr)

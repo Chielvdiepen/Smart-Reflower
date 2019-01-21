@@ -10,7 +10,11 @@
 #include "board_GPIO_ID.h"
 
 int LCD_write(uint8_t value);            // write single char to LCD
-void LCD_write_string(char *textbuffer); // writes 20 characters to line
+
+     /////////////////|						 dit is een 4 regel lange bericht	 					  |/////////////////
+void LCD_write_string(char *textbuffer); // writes string to line
+     /////////////////"                    "///////////// 1 regel bericht ////////////
+
 int LCD_clear();
 int LCD_home();
 int LCD_begin();
