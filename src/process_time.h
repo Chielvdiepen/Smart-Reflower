@@ -1,5 +1,5 @@
-#ifndef Visual_LCD_H
-#define Visual_LCD_H
+#ifndef PROCESS_TIME_H
+#define PROCESS_TIME_H
 
 #include "board.h"
 #include "board_GPIO_ID.h"
@@ -32,20 +32,7 @@
 #include "usb_init.h"
 #include "usb/cdc_vcom.h"
 
-// state data struct, filled with init
-struct state
-{
-    char state_name[14];
-    uint64_t begin_time;
-    uint64_t duration;
-    uint64_t end_time;
-    uint64_t step_time;
-    int state_temp;
-};
-
-void state_init(struct state *fase, uint64_t duration_s, uint64_t def_start_time, const char *name_state, int state_temp);
-void progressbar_run(struct state *fase, int alarm_tune);
-void state_display(struct state *fase, int *perc_progress);
-char* relais_state(char *Relais_status);
+int Cur_Time();
+void Timer_init(void);
 
 #endif

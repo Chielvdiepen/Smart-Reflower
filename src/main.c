@@ -10,7 +10,10 @@
 #include <lpc_tools/boardconfig.h>
 #include <lpc_tools/GPIO_HAL.h>
 #include <lpc_tools/GPIO_HAL_LPC.h>
+
+// timing includes
 #include <mcu_timing/delay.h>
+#include "process_time.h"
 
 // max31855 includes
 #include "MAX31855.h"
@@ -55,7 +58,7 @@ static int DWELL_temp = 20;
 static int COOLDOWN_temp = 60;
 static int TOTAL_temp = 0;
 
-static const char state_buffer[6][14] = {"Preheat fase", "soak fase", "Reflow fase", "Dwell fase", "Cooldown fase", "Totaal fase"};
+static const char state_buffer[6][14] = {"Preheat fase", "Soak fase", "Reflow fase", "Dwell fase", "Cooldown fase", "Totaal fase"};
 
 // state data struct, filled with init
 struct state PREHEAT, SOAK, REFLOW, DWELL, COOLDOWN, TOTAL;
@@ -90,40 +93,76 @@ int main(void)
 	state_init(&COOLDOWN, COOLDOWN_DurS, COOLDOWN_startS, state_buffer[4], COOLDOWN_temp);
 	state_init(&TOTAL, TOTAL_DurS, TOTAL_startS, state_buffer[5], TOTAL_temp);
 
+	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
+	const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
+	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*																													*/
 	/*											Main code: state machine?												*/
 	/*																													*/
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////|						 dit is een 4 regel lange bericht	 					  |/////////////////
-	//LCD_write_string("");
+	// /////////////////|						 dit is een 4 regel lange bericht	 					  |/////////////////
+	// LCD_write_string("");
 
-	// progressbar_run(&PREHEAT, 0, i);
-	// progressbar_run(&SOAK, 0, i);
-	// progressbar_run(&REFLOW, 0, i);
-	// progressbar_run(&DWELL, 0, i);
+	// progressbar_run(&PREHEAT, 0);
+	// progressbar_run(&SOAK, 0);
+	// progressbar_run(&REFLOW, 0;
+	// progressbar_run(&DWELL, 0);
+
+	// GPIO_HAL_toggle(LED_R);
+	// GPIO_HAL_toggle(pwm_RELAIS);
+	// GPIO_HAL_get(LED_R);
+
+	// GPIO_HAL_set(board_get_GPIO(GPIO_ID_LED_G), GPIO_HAL_get(LED_R));
 
 	// for (int i = 240; i < 301; i++)
 	// {
-	// 	progressbar_run(&COOLDOWN, 2, i);
+	// 	progressbar_run(&COOLDOWN, 5, i);
 	// 	delay_us(1000000);
+	// 	if (i == 260 || i == 280)
+	// 	{
+	// 		GPIO_HAL_toggle(LED_R);
+	// 		GPIO_HAL_toggle(pwm_RELAIS);
+	// 	}
 	// }
 
 	// int prompt = 0;
+
 	// while (true)
 	// {
 	// 	if ((vcom_connected() != 0) && (prompt == 0))
 	// 	{
 	// 		vcom_write("Jitter Smart-Reflower VCOM.\r\n", 29);
 	// 		prompt = 1;
+	// 		break;
 	// 	}
-	// 	if (prompt)
-	// 	{
-	// 		GPIO_HAL_toggle(led_STATUS);
-	// 		GeefTemp();
-	// 		delay_us(5E6);
-	// 	}
+	// }
+
+	// if (prompt)
+	// {
+	int aan = 1;
+	Timer_init();
+	GPIO_HAL_toggle(led_STATUS);
+	while (aan)
+	{
+		if (Cur_Time() > 80)
+		{
+			aan = 0;
+		}
+		else
+		{
+			progressbar_run(&PREHEAT, 0);
+		}
+	}
+
+	// if (Cur_Time() % 500 == 0)
+	// {
+	// 	GPIO_HAL_toggle(LED_R);
+	// 	// GPIO_HAL_toggle(pwm_RELAIS);
+	// }
+
 	// }
 
 	return 0;
