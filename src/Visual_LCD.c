@@ -1,17 +1,33 @@
+#include "board.h"
+#include "board_GPIO_ID.h"
+#include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <chip.h>
+#include <lpc_tools/clock.h>
+#include <lpc_tools/boardconfig.h>
 #include <lpc_tools/GPIO_HAL.h>
-#include "board.h"
-#include "board_GPIO_ID.h"
-#include "LCD.h"
-#include "Buzzer_Motor.h"
+#include <lpc_tools/GPIO_HAL_LPC.h>
 #include <mcu_timing/delay.h>
-#include <stdio.h>
-#include <string.h>
-#include "Visual_LCD.h"
+
+// max31855 includes
 #include "MAX31855.h"
+
+// LCD includes
+#include "i2c.h"
+#include "LCD.h"
+#include "Visual_LCD.h"
+
+//PWM includes
+#include <c_utils/assert.h>
+#include <c_utils/max.h>
+#include "Buzzer_Motor.h"
+
+// USB include
+#include "usb_init.h"
+#include "usb/cdc_vcom.h"
 
 static const uint8_t block_char = 255; // block character int block_char = 255;
 
@@ -54,13 +70,32 @@ void progressbar_run(struct state *fase, int alarm_tune, uint64_t cur_time)
 void state_display(struct state *fase, int *perc_progress)
 {
     char buffer[100];
+    char Relais_status[4];
     int progress = (*perc_progress * 100) / 20;
 
     LCD_setCursor(0, 0);
-    snprintf(buffer, sizeof(buffer), "%13s Rl:%3s", fase->state_name, "aan"); //14-20 vrij
+    snprintf(buffer, sizeof(buffer), "%13s Rl:%3s", fase->state_name, relais_state(Relais_status)); //14-20 vrij
     LCD_write_string(buffer);
 
     LCD_setCursor(0, 1);
     snprintf(buffer, sizeof(buffer), "       %3d%s     ", progress, "%"); // percentage progress berekening
     LCD_write_string(buffer);
+}
+
+char* relais_state(char *Relais_status)
+{
+    const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
+
+    int check = GPIO_HAL_get(pwm_RELAIS);
+
+    if (check == 1)
+    {
+        strcpy(Relais_status, "Aan");
+    }
+    else
+    {
+        strcpy(Relais_status, "Uit");
+    };
+
+    return Relais_status;
 }

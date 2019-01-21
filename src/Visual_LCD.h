@@ -26,5 +26,6 @@ struct state
 void state_init(struct state *fase, uint64_t duration_s, uint64_t def_start_time, const char *name_state, int state_temp);
 void progressbar_run(struct state *fase, int alarm_tune, uint64_t cur_time);
 void state_display(struct state *fase, int *perc_progress);
+char* relais_state(char *Relais_status);
 
 #endif

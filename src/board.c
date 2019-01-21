@@ -22,7 +22,7 @@ static const PinMuxConfig pinmuxing[] = {
 	{1, 31, (IOCON_FUNC0)}, // LED RED
 	{1, 21, (IOCON_FUNC0)}, // LED YELLOW
 	{0, 9, (IOCON_FUNC0)},  // LED GREEN
-	{0, 14, (IOCON_FUNC1)}, // PWM RELAIS, geen echte PWM nodig
+	{0, 14, (IOCON_FUNC1 | IOCON_DIGMODE_EN)}, // PWM RELAIS, geen echte PWM nodig
 	{1, 26, (IOCON_FUNC1)}, // PWM DC // CT32B0_MAT2
 	{1, 25, (IOCON_FUNC0)}, // PWM EXTERNAL, geen echte PWM nodig
 	{1, 19, (IOCON_FUNC0)}, // PWM SERVO, is niet mogelijk, geen hardware timer op deze pin
