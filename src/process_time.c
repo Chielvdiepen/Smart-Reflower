@@ -37,8 +37,14 @@ void Timer_init(void)
     start_timestamp = delay_get_timestamp();
 }
 
-int Cur_Time()
+int Cur_Time_s()
 {
     int tijd_s = (delay_calc_time_us(start_timestamp, delay_get_timestamp())) / 1000000;
     return tijd_s;
+}
+
+int Cur_Time_ms()
+{
+    int tijd_ms = (delay_calc_time_us(start_timestamp, delay_get_timestamp())) / 1000000;
+    return tijd_ms;
 }

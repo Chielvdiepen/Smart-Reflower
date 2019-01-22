@@ -32,7 +32,8 @@
 #include "usb_init.h"
 #include "usb/cdc_vcom.h"
 
-int Cur_Time();
+int Cur_Time_s();
+int Cur_Time_ms();
 void Timer_init(void);
 
 #endif
