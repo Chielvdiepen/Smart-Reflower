@@ -18,22 +18,22 @@ static const PinMuxConfig pinmuxing[] = {
 	// config of pin and function from datasheet
 
 	// Poort-Pin-functie
-	{0, 7, (IOCON_FUNC0)},  // LED STATUS
-	{1, 31, (IOCON_FUNC0)}, // LED RED
-	{1, 21, (IOCON_FUNC0)}, // LED YELLOW
-	{0, 9, (IOCON_FUNC0)},  // LED GREEN
-	{0, 14, (IOCON_FUNC1 | IOCON_DIGMODE_EN)}, // PWM RELAIS, geen echte PWM nodig
-	{1, 26, (IOCON_FUNC1)}, // PWM DC // CT32B0_MAT2
-	{1, 25, (IOCON_FUNC0)}, // PWM EXTERNAL, geen echte PWM nodig
-	{1, 19, (IOCON_FUNC0)}, // PWM SERVO, is niet mogelijk, geen hardware timer op deze pin
-	{1, 20, (IOCON_FUNC0)}, // CS1
-	{1, 27, (IOCON_FUNC0)}, // CS2
-	{0, 13, (IOCON_FUNC1)}, // BUTTON
-	{0, 22, (IOCON_FUNC2)}, // BUZZER // CT16B1_MAT1
-	{0, 4, (IOCON_FUNC1)},  // SCL
-	{0, 5, (IOCON_FUNC1)},  // SDA
-	{1, 29, (IOCON_FUNC1)}, // SCK0
-	{0, 8, (IOCON_FUNC1)},  // MISO0
+	{0, 7, (IOCON_FUNC0)},						// LED STATUS
+	{1, 31, (IOCON_FUNC0)},						// LED RED
+	{1, 21, (IOCON_FUNC0)},						// LED YELLOW
+	{0, 9, (IOCON_FUNC0)},						// LED GREEN
+	{0, 14, (IOCON_FUNC1 | IOCON_DIGMODE_EN)},  // PWM RELAIS, geen echte PWM nodig
+	{1, 26, (IOCON_FUNC1)},						// PWM DC // CT32B0_MAT2
+	{1, 25, (IOCON_FUNC0)},						// PWM EXTERNAL, geen echte PWM nodig
+	{1, 19, (IOCON_FUNC0)},						// PWM SERVO, is niet mogelijk, geen hardware timer op deze pin
+	{1, 20, (IOCON_FUNC0)},						// CS1
+	{1, 27, (IOCON_FUNC0)},						// CS2
+	{0, 13, (IOCON_FUNC1 | IOCON_MODE_PULLUP | IOCON_DIGMODE_EN)}, // BUTTON
+	{0, 22, (IOCON_FUNC2)},						// BUZZER // CT16B1_MAT1
+	{0, 4, (IOCON_FUNC1)},						// SCL
+	{0, 5, (IOCON_FUNC1)},						// SDA
+	{1, 29, (IOCON_FUNC1)},						// SCK0
+	{0, 8, (IOCON_FUNC1)},						// MISO0
 };
 
 static const GPIOConfig pin_config[] = {
