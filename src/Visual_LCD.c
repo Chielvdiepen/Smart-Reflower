@@ -50,22 +50,23 @@ void state_init(struct state *fase, uint64_t duration_s, uint64_t def_start_time
 
 void progressbar_run(struct state *fase, int alarm_tune)
 {
-    int block_count = ((Cur_Time()) - (fase->begin_time)) / ((fase->step_time));
+    int block_count = ((Cur_Time_s()) - (fase->begin_time)) / ((fase->step_time));
 
-    if (block_count > 20)
+    state_display(fase, &block_count);
+
+    if (block_count == 20)
     {
         if (strcmp(fase->state_name, "Cooldown fase") == 0 || strcmp(fase->state_name, "Totaal fase") == 0)
         {
             Buzzer_alarm(alarm_tune);
         }
     }
-
-    state_display(fase, &block_count);
 }
 
 void state_display(struct state *fase, int *perc_progress)
 {
     char buffer[100];
+    char spaties[21] = "                    ";
     char Relais_status[4];
     int progress;
 
@@ -78,6 +79,10 @@ void state_display(struct state *fase, int *perc_progress)
         progress = 100;
     }
 
+    int aantal_block = progress / 5;
+    int aantal_spaties = (20 - aantal_block);
+
+
     LCD_setCursor(0, 0);
     snprintf(buffer, sizeof(buffer), "%-13s Rl:%3s", fase->state_name, relais_state(Relais_status)); //14-20 vrij
     LCD_write_string(buffer);
@@ -87,13 +92,17 @@ void state_display(struct state *fase, int *perc_progress)
     LCD_write_string(buffer);
 
     LCD_setCursor(0, 2);
-    for (int i = 0; i < progress/5; i++)
+    for (int i = 0; i < aantal_block; i++)
     {
         LCD_write(block_char);
     }
+    for (int i = 0; i < aantal_spaties; i++)
+    {
+        LCD_write(spaties[i]);
+    }
 
     LCD_setCursor(0, 3);
-    snprintf(buffer, sizeof(buffer), "Tijd %.2d:%.2d Temp:%3dC", Cur_Time() / 60, Cur_Time() % 60, Meet_Temp()); // percentage progress berekening
+    snprintf(buffer, sizeof(buffer), "Tijd %.2d:%.2d Temp:%3dC", Cur_Time_s() / 60, Cur_Time_s() % 60, Meet_Temp()); // percentage progress berekening
     LCD_write_string(buffer);
 }
 
@@ -113,4 +122,20 @@ char *relais_state(char *Relais_status)
     };
 
     return Relais_status;
+}
+
+void Start_Screen(void)
+{
+    LCD_write_string("       Jitter       ");
+    LCD_write_string("   Smart-Reflower   ");
+    LCD_write_string("    Press Button    ");
+    LCD_write_string("To Begin The Process");
+}
+
+void End_Screen(void)
+{
+    LCD_write_string("Process is Finished!");
+    LCD_write_string("     Wait 10s to    ");
+    LCD_write_string("  Return to start   ");
+    LCD_write_string("       @Jitter      ");
 }

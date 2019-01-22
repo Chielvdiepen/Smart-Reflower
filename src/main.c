@@ -63,6 +63,12 @@ static const char state_buffer[6][14] = {"Preheat fase", "Soak fase", "Reflow fa
 // state data struct, filled with init
 struct state PREHEAT, SOAK, REFLOW, DWELL, COOLDOWN, TOTAL;
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*																													*/
+/*												Start Main code														*/
+/*																													*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int main(void)
 {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,74 +102,54 @@ int main(void)
 	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
 	const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
 	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
+	const GPIO *Button = board_get_GPIO(GPIO_ID_BUTTON);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*																													*/
-	/*											Main code: state machine?												*/
+	/*													Main Loop														*/
 	/*																													*/
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// /////////////////|						 dit is een 4 regel lange bericht	 					  |/////////////////
-	// LCD_write_string("");
+	while (true)
+	{
+		Start_Screen();
+		if (GPIO_HAL_get(Button) == 0)
+		{
+			vcom_write("Jitter Smart-Reflower VCOM.\r\n", 29);
+			int aan = 1;
+			GPIO_HAL_toggle(LED_R);
+			LCD_clear();
+			Timer_init();
+			while (aan)
+			{
+				if (Cur_Time_s() > 300)
+				{
+					// break;
+					aan = 0;
+				}
+				else
+				{
+					if ((Cur_Time_s() == 10) || (Cur_Time_s() == 11) || (Cur_Time_s() == 12) || (Cur_Time_s() == 13) || (Cur_Time_s() == 14) || (Cur_Time_s() == 15))
+					{
+						progressbar_run(&PREHEAT, 0);
+					}
+					else
+					{
+						progressbar_run(&TOTAL, 0);
+					}
+				}
+			}
+			End_Screen();
+			delay_us(10E6);
+		}
+		GPIO_HAL_toggle(led_STATUS);
+		delay_us(1000000);
+	}
+
+	return 0;
+}
 
 	// progressbar_run(&PREHEAT, 0);
 	// progressbar_run(&SOAK, 0);
 	// progressbar_run(&REFLOW, 0;
 	// progressbar_run(&DWELL, 0);
-
-	// GPIO_HAL_toggle(LED_R);
-	// GPIO_HAL_toggle(pwm_RELAIS);
-	// GPIO_HAL_get(LED_R);
-
-	// GPIO_HAL_set(board_get_GPIO(GPIO_ID_LED_G), GPIO_HAL_get(LED_R));
-
-	// for (int i = 240; i < 301; i++)
-	// {
-	// 	progressbar_run(&COOLDOWN, 5, i);
-	// 	delay_us(1000000);
-	// 	if (i == 260 || i == 280)
-	// 	{
-	// 		GPIO_HAL_toggle(LED_R);
-	// 		GPIO_HAL_toggle(pwm_RELAIS);
-	// 	}
-	// }
-
-	// int prompt = 0;
-
-	// while (true)
-	// {
-	// 	if ((vcom_connected() != 0) && (prompt == 0))
-	// 	{
-	// 		vcom_write("Jitter Smart-Reflower VCOM.\r\n", 29);
-	// 		prompt = 1;
-	// 		break;
-	// 	}
-	// }
-
-	// if (prompt)
-	// {
-	int aan = 1;
-	Timer_init();
-	GPIO_HAL_toggle(led_STATUS);
-	while (aan)
-	{
-		if (Cur_Time() > 80)
-		{
-			aan = 0;
-		}
-		else
-		{
-			progressbar_run(&PREHEAT, 0);
-		}
-	}
-
-	// if (Cur_Time() % 500 == 0)
-	// {
-	// 	GPIO_HAL_toggle(LED_R);
-	// 	// GPIO_HAL_toggle(pwm_RELAIS);
-	// }
-
-	// }
-
-	return 0;
-}
