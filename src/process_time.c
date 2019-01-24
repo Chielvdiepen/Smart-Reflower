@@ -30,21 +30,27 @@
 #include "usb/cdc_vcom.h"
 
 //global variable
-uint64_t start_timestamp;
+uint64_t total_start_timestamp;
+uint64_t state_start_timestamp;
 
-void Timer_init(void)
+void Total_timer_init(void)
 {
-    start_timestamp = delay_get_timestamp();
+    total_start_timestamp = delay_get_timestamp();
 }
 
-int Cur_Time_s()
+int Total_cur_time_s()
 {
-    int tijd_s = (delay_calc_time_us(start_timestamp, delay_get_timestamp())) / 1000000;
+    int tijd_s = (delay_calc_time_us(total_start_timestamp, delay_get_timestamp())) / 1000000;
     return tijd_s;
 }
 
-int Cur_Time_ms()
+void State_timer_init(void)
 {
-    int tijd_ms = (delay_calc_time_us(start_timestamp, delay_get_timestamp())) / 1000000;
-    return tijd_ms;
+    state_start_timestamp = delay_get_timestamp();
+}
+
+int State_cur_time_s()
+{
+    int time_s = (delay_calc_time_us(state_start_timestamp, delay_get_timestamp())) / 1000000;
+    return time_s;
 }

@@ -8,6 +8,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include "board.h"
 #include "board_GPIO_ID.h"
+#include "process_time.h"
 
 void i2c_init (void);
 void i2c_read (uint8_t* rxBuff,int rxSz);

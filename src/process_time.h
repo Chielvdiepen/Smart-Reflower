@@ -14,6 +14,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include <lpc_tools/GPIO_HAL_LPC.h>
 #include <mcu_timing/delay.h>
+#include "process_time.h"
 
 // max31855 includes
 #include "MAX31855.h"
@@ -32,8 +33,10 @@
 #include "usb_init.h"
 #include "usb/cdc_vcom.h"
 
-int Cur_Time_s();
-int Cur_Time_ms();
-void Timer_init(void);
+void Total_timer_init(void);
+int Total_cur_time_s();
+
+void State_timer_init(void);
+int State_cur_time_s();
 
 #endif

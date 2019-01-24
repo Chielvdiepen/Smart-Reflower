@@ -14,6 +14,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include <lpc_tools/GPIO_HAL_LPC.h>
 #include <mcu_timing/delay.h>
+#include "process_time.h"
 
 // max31855 includes
 #include "MAX31855.h"

@@ -14,6 +14,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include <lpc_tools/GPIO_HAL_LPC.h>
 #include <mcu_timing/delay.h>
+#include "process_time.h"
 
 // max31855 includes
 #include "MAX31855.h"
@@ -36,17 +37,16 @@
 struct state
 {
     char state_name[14];
-    uint64_t begin_time;
-    uint64_t duration;
-    uint64_t end_time;
-    uint64_t step_time;
+    int duration;
+    int step_time;
     int state_temp;
 };
 
-void state_init(struct state *fase, uint64_t duration_s, uint64_t def_start_time, const char *name_state, int state_temp);
-void progressbar_run(struct state *fase, int alarm_tune);
+void state_init(struct state *fase, int duration_s, const char *name_state, int state_temp);
+void progressbar_run(struct state *fase);
+void progressbar_run_total(struct state *fase);
 void state_display(struct state *fase, int *perc_progress);
-char* relais_state(char *Relais_status);
+char *relais_state(char *Relais_status);
 void Start_Screen(void);
 void End_Screen(void);
 

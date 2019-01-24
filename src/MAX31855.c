@@ -96,7 +96,7 @@ int Meet_Temp(void)
 	signed int Temp_int2 = Y.Temp_int / 16;
 	signed int Temp_Ext2 = Y.Temp_ext / 4;
 
-	signed int Temp_out = (Temp_Ext1 + Temp_Ext2)/2;
+	signed int Temp_out = (Temp_Ext1 + Temp_Ext2) / 2;
 
 	//Print data over VCOM
 	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext1, Temp_int1, X.SCV, X.SCG, X.OC);
@@ -105,8 +105,14 @@ int Meet_Temp(void)
 	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext2, Temp_int2, Y.SCV, Y.SCG, Y.OC);
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
-
-	return Temp_out;
+	if ((X.OC == 0) || (Y.OC == 0))
+	{
+		return Temp_out;
+	}
+	else
+	{	
+		return 0;
+	}
 }
 
 void *_sbrk(int incr)

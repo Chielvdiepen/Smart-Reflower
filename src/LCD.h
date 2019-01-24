@@ -8,6 +8,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include "board.h"
 #include "board_GPIO_ID.h"
+#include "process_time.h"
 
 int LCD_write(uint8_t value);            // write single char to LCD
 
