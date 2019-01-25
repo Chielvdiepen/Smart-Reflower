@@ -38,11 +38,12 @@ struct state
 {
     char state_name[14];
     int duration;
+    int begin_temp;
     int step_time;
     int state_temp;
 };
 
-void state_init(struct state *fase, int duration_s, const char *name_state, int state_temp);
+void state_init(struct state *fase, int duration_s, int begin, const char *name_state, int state_temp);
 void progressbar_run(struct state *fase);
 void progressbar_run_total(struct state *fase);
 void state_display(struct state *fase, int *perc_progress);

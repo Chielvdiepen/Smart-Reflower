@@ -32,10 +32,12 @@
 
 static const uint8_t block_char = 255; // block character int block_char = 255;
 
-void state_init(struct state *fase, int duration_s, const char *name_state, int temp_state)
+void state_init(struct state *fase, int duration_s, int begin, const char *name_state, int temp_state)
 {
     // save name in struct for printing on LCD
     strcpy(fase->state_name, name_state);
+    // save begin temp of state
+    fase->begin_temp = begin;
     // save duration to struct
     fase->duration = (duration_s);
     //calc time per step

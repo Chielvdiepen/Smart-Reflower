@@ -36,20 +36,21 @@
 #define CLK_FREQ (48e6)
 
 // defined durations of the reflow states in seconds
-static int PREHEAT_DurS = 80;
-static int SOAK_DurS = 100;
-static int REFLOW_DurS = 40;
-static int DWELL_DurS = 20;
-static int COOLDOWN_DurS = 60;
+static int PREHEAT_DurS = 80;  // 80 sec
+static int SOAK_DurS = 100;	 // 100 sec
+static int REFLOW_DurS = 40;   // 40 sec
+static int DWELL_DurS = 20;	// 20 sec
+static int COOLDOWN_DurS = 60; // 60 sec
 static int END_DurS = 30;
 static int TOTAL_DurS = 300;
 
 // defined temperatures of the reflow states in Celsius
-static int PREHEAT_temp = 150;
-static int SOAK_temp = 200;
-static int REFLOW_temp = 230;
-static int DWELL_temp = 255;
-static int COOLDOWN_temp = 100;
+static int Begin_temp = 20;
+static int PREHEAT_temp = 150;  // 150 C
+static int SOAK_temp = 200;	 // 200 C
+static int REFLOW_temp = 230;   // 230 C
+static int DWELL_temp = 255;	// 255 c
+static int COOLDOWN_temp = 100; // 100 C
 static int TOTAL_temp = 0;
 
 static const char state_buffer[6][14] = {"Preheat fase", "Soak fase", "Reflow fase", "Dwell fase", "Cooldown fase", "Totaal fase"};
@@ -79,7 +80,14 @@ enum ProfielState Profiel_state_Dwell(void);
 enum ProfielState Profiel_state_Cooldown(void);
 enum ProfielState Profiel_state_End(void);
 
-int setpoint_calc(double cur_temp, struct state *fase);
+int setpoint_calc(struct state *fase);
+void Display_switch(struct state *fase);
+bool temp_check(struct state *fase);
+
+int switch_time = 5; // display switch time, 5s
+bool display_total = false;
+bool Check_switch = true;
+int last_switch_time;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*																													*/
@@ -91,12 +99,20 @@ enum ProfielState Profiel_state_idle(void)
 {
 	enum ProfielState next_state = ProfielStateIdle;
 	const GPIO *Button = board_get_GPIO(GPIO_ID_BUTTON);
+	const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
+	const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
+
+	GPIO_HAL_set(LED_R, HIGH);
+	GPIO_HAL_set(LED_G, LOW);
+
+	temp_check(&PREHEAT); // for lightning up yellow led if sensors are connected
 
 	Start_Screen();
 
 	if (GPIO_HAL_get(Button) == 0)
 	{
-		vcom_write("Jitter Smart-Reflower VCOM.\r\n", 29);
+		GPIO_HAL_set(LED_R, LOW);
+		GPIO_HAL_set(LED_G, HIGH);
 		LCD_clear();
 		next_state = ProfielStatePreheat;
 		State_timer_init();
@@ -110,11 +126,19 @@ enum ProfielState Profiel_state_Preheat(void)
 {
 	enum ProfielState next_state = ProfielStatePreheat;
 
-	Control_Relais(setpoint_calc(21, &PREHEAT));
+	// char buffer[20];
+	// snprintf(buffer, sizeof(buffer), "%d", setpoint_calc(&PREHEAT));
+	// LCD_setCursor(0, 1);
+	// LCD_write_string(buffer);
+	Control_Relais(setpoint_calc(&PREHEAT));
+	Display_switch(&PREHEAT);
 
-	progressbar_run(&PREHEAT);
+	if ((State_cur_time_s() >= PREHEAT_DurS) && (temp_check(&PREHEAT) == false))
+	{
+		next_state = ProfielStatePreheat;
+	}
 
-	if (State_cur_time_s() == PREHEAT_DurS)
+	if ((State_cur_time_s() >= PREHEAT_DurS) && (temp_check(&PREHEAT) == true))
 	{
 		next_state = ProfielStateSoak;
 	}
@@ -126,10 +150,15 @@ enum ProfielState Profiel_state_Soak(void)
 {
 	enum ProfielState next_state = ProfielStateSoak;
 
-	Control_Relais(setpoint_calc(150, &SOAK));
+	Control_Relais(setpoint_calc(&SOAK));
 	progressbar_run(&SOAK);
 
-	if (State_cur_time_s() == SOAK_DurS)
+	if ((State_cur_time_s() >= SOAK_DurS) && (temp_check(&SOAK) == false))
+	{
+		next_state = ProfielStateSoak;
+	}
+
+	if ((State_cur_time_s() >= SOAK_DurS) && (temp_check(&SOAK) == true))
 	{
 		next_state = ProfielStateReflow;
 	}
@@ -141,10 +170,15 @@ enum ProfielState Profiel_state_Reflow(void)
 {
 	enum ProfielState next_state = ProfielStateReflow;
 
-	Control_Relais(setpoint_calc(200, &REFLOW));
+	Control_Relais(setpoint_calc(&REFLOW));
 	progressbar_run(&REFLOW);
 
-	if (State_cur_time_s() == REFLOW_DurS)
+	if ((State_cur_time_s() >= REFLOW_DurS) && (temp_check(&REFLOW) == false))
+	{
+		next_state = ProfielStateReflow;
+	}
+
+	if ((State_cur_time_s() >= REFLOW_DurS) && (temp_check(&REFLOW) == true))
 	{
 		next_state = ProfielStateDwell;
 	}
@@ -156,10 +190,15 @@ enum ProfielState Profiel_state_Dwell(void)
 {
 	enum ProfielState next_state = ProfielStateDwell;
 
-	Control_Relais(setpoint_calc(230, &DWELL));
+	Control_Relais(setpoint_calc(&DWELL));
 	progressbar_run(&DWELL);
 
-	if (State_cur_time_s() == DWELL_DurS)
+	if ((State_cur_time_s() >= DWELL_DurS) && (temp_check(&DWELL) == false))
+	{
+		next_state = ProfielStateDwell;
+	}
+
+	if ((State_cur_time_s() >= DWELL_DurS) && (temp_check(&DWELL) == true))
 	{
 		next_state = ProfielStateCooldown;
 	}
@@ -171,12 +210,16 @@ enum ProfielState Profiel_state_Cooldown(void)
 {
 	enum ProfielState next_state = ProfielStateCooldown;
 
-	Control_Relais(setpoint_calc(255, &COOLDOWN));
+	Control_Relais(setpoint_calc(&COOLDOWN));
 	progressbar_run(&COOLDOWN);
 
-	if (State_cur_time_s() > COOLDOWN_DurS)
+	if ((State_cur_time_s() >= COOLDOWN_DurS) && (temp_check(&COOLDOWN) == false))
 	{
-		Buzzer_alarm(0);
+		next_state = ProfielStateCooldown;
+	}
+
+	if ((State_cur_time_s() >= COOLDOWN_DurS) && (temp_check(&COOLDOWN) == true))
+	{
 		next_state = ProfielStateEnd;
 	}
 
@@ -189,6 +232,11 @@ enum ProfielState Profiel_state_End(void)
 
 	End_Screen();
 
+	if (State_cur_time_s() == 0)
+	{
+		Buzzer_alarm(0);
+	}
+
 	if (State_cur_time_s() == END_DurS)
 	{
 		next_state = ProfielStateIdle;
@@ -197,12 +245,90 @@ enum ProfielState Profiel_state_End(void)
 	return next_state;
 }
 
-int setpoint_calc(double cur_temp, struct state *fase)
+bool temp_check(struct state *fase)
 {
-	float Helling_Temp_S = (((fase->state_temp) - cur_temp) / (fase->duration));
-	int setpoint_temp = (State_cur_time_s() * Helling_Temp_S) + cur_temp;
+	if (Meet_Temp() >= (fase->state_temp))
+	{
+		return true;
+	}
 
-	return setpoint_temp;
+	return false;
+}
+
+int setpoint_calc(struct state *fase)
+{
+	float Helling_Temp_S = (((fase->state_temp) - (fase->begin_temp)) / (fase->duration));
+	int setpoint_temp = (State_cur_time_s() * Helling_Temp_S) + (fase->begin_temp);
+
+	if (setpoint_temp > (fase->state_temp))
+	{
+		return (fase->state_temp);
+	}
+	else
+	{
+		return setpoint_temp;
+	}
+}
+
+void Display_switch(struct state *fase)
+{
+	if ((Total_cur_time_s() % switch_time) == 0)
+	{
+		if (Total_cur_time_s() != last_switch_time)
+		{
+			display_total = !display_total;
+			last_switch_time = Total_cur_time_s();
+		}
+	}
+
+	if (display_total == true)
+	{
+		progressbar_run(fase);
+	}
+	else
+	{
+		progressbar_run_total(&TOTAL);
+	}
+}
+
+void state_machine(void)
+{
+	enum ProfielState next_state = cur_state;
+	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
+
+	switch (cur_state)
+	{
+	case ProfielStateIdle:
+		next_state = Profiel_state_idle();
+		break;
+	case ProfielStatePreheat:
+		next_state = Profiel_state_Preheat();
+		break;
+	case ProfielStateSoak:
+		next_state = Profiel_state_Soak();
+		break;
+	case ProfielStateReflow:
+		next_state = Profiel_state_Reflow();
+		break;
+	case ProfielStateDwell:
+		next_state = Profiel_state_Dwell();
+		break;
+	case ProfielStateCooldown:
+		next_state = Profiel_state_Cooldown();
+		break;
+	case ProfielStateEnd:
+		next_state = Profiel_state_End();
+		break;
+	default:
+		next_state = Profiel_state_idle();
+	}
+
+	if (next_state != cur_state)
+	{
+		GPIO_HAL_toggle(led_STATUS);
+		State_timer_init();
+		cur_state = next_state;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,53 +354,16 @@ int main(void)
 	LCD_begin();
 
 	// config the state with values
-	state_init(&PREHEAT, PREHEAT_DurS, state_buffer[0], PREHEAT_temp);
-	state_init(&SOAK, SOAK_DurS, state_buffer[1], SOAK_temp);
-	state_init(&REFLOW, REFLOW_DurS, state_buffer[2], REFLOW_temp);
-	state_init(&DWELL, DWELL_DurS, state_buffer[3], DWELL_temp);
-	state_init(&COOLDOWN, COOLDOWN_DurS, state_buffer[4], COOLDOWN_temp);
-	state_init(&TOTAL, TOTAL_DurS, state_buffer[5], TOTAL_temp);
-
-	// const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
-	// const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
-	// const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
+	state_init(&PREHEAT, PREHEAT_DurS, Begin_temp, state_buffer[0], PREHEAT_temp);
+	state_init(&SOAK, SOAK_DurS, PREHEAT_temp, state_buffer[1], SOAK_temp);
+	state_init(&REFLOW, REFLOW_DurS, SOAK_temp, state_buffer[2], REFLOW_temp);
+	state_init(&DWELL, DWELL_DurS, REFLOW_temp, state_buffer[3], DWELL_temp);
+	state_init(&COOLDOWN, COOLDOWN_DurS, DWELL_temp, state_buffer[4], COOLDOWN_temp);
+	state_init(&TOTAL, TOTAL_DurS, TOTAL_temp, state_buffer[5], TOTAL_temp);
 
 	while (true)
 	{
-		enum ProfielState next_state = cur_state;
-
-		switch (cur_state)
-		{
-		case ProfielStateIdle:
-			next_state = Profiel_state_idle();
-			break;
-		case ProfielStatePreheat:
-			next_state = Profiel_state_Preheat();
-			break;
-		case ProfielStateSoak:
-			next_state = Profiel_state_Soak();
-			break;
-		case ProfielStateReflow:
-			next_state = Profiel_state_Reflow();
-			break;
-		case ProfielStateDwell:
-			next_state = Profiel_state_Dwell();
-			break;
-		case ProfielStateCooldown:
-			next_state = Profiel_state_Cooldown();
-			break;
-		case ProfielStateEnd:
-			next_state = Profiel_state_End();
-			break;
-		default:
-			next_state = Profiel_state_idle();
-		}
-
-		if (next_state != cur_state)
-		{
-			State_timer_init();
-			cur_state = next_state;
-		}
+		state_machine();
 	}
 
 	return 0;
