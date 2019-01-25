@@ -91,26 +91,29 @@ int Meet_Temp(void)
 	Y.OC = buffer[3] & (1 << 0);
 
 	//temp conversie
-	signed int Temp_int1 = X.Temp_int / 16;
+	// signed int Temp_int1 = X.Temp_int / 16;
 	signed int Temp_Ext1 = X.Temp_ext / 4;
-	signed int Temp_int2 = Y.Temp_int / 16;
+	// signed int Temp_int2 = Y.Temp_int / 16;
 	signed int Temp_Ext2 = Y.Temp_ext / 4;
 
 	signed int Temp_out = (Temp_Ext1 + Temp_Ext2) / 2;
 
 	//Print data over VCOM
-	snprintf(waardenX, sizeof(waardenX), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext1, Temp_int1, X.SCV, X.SCG, X.OC);
+	snprintf(waardenX, sizeof(waardenX), "Temp-ext1 = %d\r\n", Temp_Ext1);
 	vcom_write((uint8_t *)waardenX, strlen(waardenX));
 
-	snprintf(waardenY, sizeof(waardenY), "Temp-ext= %d,Temp-int= %d,Flag-V= %d,Flag-G= %d,Flag-OC= %d \r\n", Temp_Ext2, Temp_int2, Y.SCV, Y.SCG, Y.OC);
+	snprintf(waardenY, sizeof(waardenY), "Temp-ext2 = %d\r\n", Temp_Ext2);
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
+	const GPIO *LED_Y = board_get_GPIO(GPIO_ID_LED_Y);
 	if ((X.OC == 0) || (Y.OC == 0))
 	{
+		GPIO_HAL_set(LED_Y, HIGH);
 		return Temp_out;
 	}
 	else
-	{	
+	{
+		GPIO_HAL_set(LED_Y, LOW);	
 		return 0;
 	}
 }
