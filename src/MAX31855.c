@@ -106,7 +106,7 @@ int Meet_Temp(void)
 	vcom_write((uint8_t *)waardenY, strlen(waardenY));
 
 	const GPIO *LED_Y = board_get_GPIO(GPIO_ID_LED_Y);
-	if ((X.OC == 0) || (Y.OC == 0))
+	if ((X.OC == 0) && (Y.OC == 0))
 	{
 		GPIO_HAL_set(LED_Y, HIGH);
 		return Temp_out;

@@ -84,7 +84,7 @@ void state_display(struct state *fase, int *perc_progress)
     LCD_write_string(buffer);
 
     LCD_setCursor(0, 1);
-    snprintf(buffer, sizeof(buffer), "       %3d%s     ", progress, "%"); // percentage progress berekening
+    snprintf(buffer, sizeof(buffer), "       %3d%s         ", progress, "%"); // percentage progress berekening
     LCD_write_string(buffer);
 
     LCD_setCursor(0, 2);
