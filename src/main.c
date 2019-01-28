@@ -11,6 +11,7 @@
 #include <lpc_tools/GPIO_HAL.h>
 #include <lpc_tools/GPIO_HAL_LPC.h>
 #include "Relais_control.h"
+#include "button.h"
 
 // timing includes
 #include <mcu_timing/delay.h>
@@ -36,18 +37,18 @@
 #define CLK_FREQ (48e6)
 
 // defined durations of the reflow states in seconds
-static int PREHEAT_DurS = 80;  // 80 sec
-static int SOAK_DurS = 100;	 // 100 sec
-static int REFLOW_DurS = 40;   // 40 sec
-static int DWELL_DurS = 20;	// 20 sec
+static int PREHEAT_DurS = 180; // 180 sec
+static int SOAK_DurS = 120;	// 120 sec
+static int REFLOW_DurS = 50;   // 50 sec
+static int DWELL_DurS = 40;	// 40 sec
 static int COOLDOWN_DurS = 60; // 60 sec
 static int END_DurS = 30;
-static int TOTAL_DurS = 300;
+static int TOTAL_DurS = 450;
 
 // defined temperatures of the reflow states in Celsius
 static int Begin_temp = 20;
 static int PREHEAT_temp = 150;  // 150 C
-static int SOAK_temp = 200;	 // 200 C
+static int SOAK_temp = 200;		// 200 C
 static int REFLOW_temp = 230;   // 230 C
 static int DWELL_temp = 255;	// 255 c
 static int COOLDOWN_temp = 100; // 100 C
@@ -83,6 +84,7 @@ enum ProfielState Profiel_state_End(void);
 int setpoint_calc(struct state *fase);
 void Display_switch(struct state *fase);
 bool temp_check(struct state *fase);
+void app_button_poll(void);
 
 int switch_time = 5; // display switch time, 5s
 bool display_total = false;
@@ -98,26 +100,15 @@ int last_switch_time;
 enum ProfielState Profiel_state_idle(void)
 {
 	enum ProfielState next_state = ProfielStateIdle;
-	const GPIO *Button = board_get_GPIO(GPIO_ID_BUTTON);
+
 	const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
 	const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
-
 	GPIO_HAL_set(LED_R, HIGH);
 	GPIO_HAL_set(LED_G, LOW);
 
 	temp_check(&PREHEAT); // for lightning up yellow led if sensors are connected
 
 	Start_Screen();
-
-	if (GPIO_HAL_get(Button) == 0)
-	{
-		GPIO_HAL_set(LED_R, LOW);
-		GPIO_HAL_set(LED_G, HIGH);
-		LCD_clear();
-		next_state = ProfielStatePreheat;
-		State_timer_init();
-		Total_timer_init();
-	}
 
 	return next_state;
 }
@@ -220,6 +211,7 @@ enum ProfielState Profiel_state_Cooldown(void)
 
 	if ((State_cur_time_s() >= COOLDOWN_DurS) && (temp_check(&COOLDOWN) == true))
 	{
+		Buzzer_alarm(0); // alarm song config
 		next_state = ProfielStateEnd;
 	}
 
@@ -229,13 +221,11 @@ enum ProfielState Profiel_state_Cooldown(void)
 enum ProfielState Profiel_state_End(void)
 {
 	enum ProfielState next_state = ProfielStateEnd;
+	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
+	const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
 
+	GPIO_HAL_set(pwm_RELAIS, LOW);
 	End_Screen();
-
-	if (State_cur_time_s() == 0)
-	{
-		Buzzer_alarm(0);
-	}
 
 	if (State_cur_time_s() == END_DurS)
 	{
@@ -257,7 +247,7 @@ bool temp_check(struct state *fase)
 
 int setpoint_calc(struct state *fase)
 {
-	float Helling_Temp_S = (((fase->state_temp) - (fase->begin_temp)) / (fase->duration));
+	float Helling_Temp_S = (((fase->state_temp) - (fase->begin_temp)) / (float)(fase->duration));
 	int setpoint_temp = (State_cur_time_s() * Helling_Temp_S) + (fase->begin_temp);
 
 	if (setpoint_temp > (fase->state_temp))
@@ -293,9 +283,9 @@ void Display_switch(struct state *fase)
 
 void state_machine(void)
 {
-	enum ProfielState next_state = cur_state;
-	const GPIO *led_STATUS = board_get_GPIO(GPIO_ID_LED_STATUS);
+	app_button_poll();
 
+	enum ProfielState next_state = cur_state;
 	switch (cur_state)
 	{
 	case ProfielStateIdle:
@@ -325,9 +315,38 @@ void state_machine(void)
 
 	if (next_state != cur_state)
 	{
-		GPIO_HAL_toggle(led_STATUS);
 		State_timer_init();
 		cur_state = next_state;
+	}
+}
+
+void app_button_poll(void)
+{
+	enum BUTTON_STATUS button = button_get_status();
+	const GPIO *LED_R = board_get_GPIO(GPIO_ID_LED_R);
+	const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
+
+	if (button == BUTTON_STATUS_START)
+	{
+		if (cur_state == ProfielStateIdle)
+		{
+			State_timer_init();
+			Total_timer_init();
+			GPIO_HAL_set(LED_R, LOW);
+			GPIO_HAL_set(LED_G, HIGH);
+			cur_state = ProfielStatePreheat;
+			return;
+		}
+	}
+
+	if (button == BUTTON_STATUS_STOP)
+	{
+		if (cur_state != ProfielStateIdle)
+		{
+			State_timer_init();
+			cur_state = ProfielStateEnd;
+			return;
+		}
 	}
 }
 
@@ -343,15 +362,18 @@ int main(void)
 	board_setup_NVIC();
 	board_setup_pins();
 
+	const GPIO *Button = board_get_GPIO(GPIO_ID_BUTTON);
+
 	// configure System Clock at 48MHz
 	clock_set_frequency(CLK_FREQ);
 	USBclockinit();
 	SystemCoreClockUpdate();
 
-	// start/init delay timers, usb and LCD
+	// start/init delay timers, usb, LCD and Button
 	delay_init();
 	usb_init();
 	LCD_begin();
+	button_init(Button);
 
 	// config the state with values
 	state_init(&PREHEAT, PREHEAT_DurS, Begin_temp, state_buffer[0], PREHEAT_temp);
