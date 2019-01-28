@@ -281,9 +281,23 @@ void Display_switch(struct state *fase)
 	}
 }
 
+int last_send_time;
+void VCOM_output(void)
+{
+	if ((Total_cur_time_s() % 1) == 0)
+	{
+		if (Total_cur_time_s() != last_send_time)
+		{
+			Temp_VCOM();
+			last_send_time = Total_cur_time_s();
+		}
+	}
+}
+
 void state_machine(void)
 {
 	app_button_poll();
+	VCOM_output();
 
 	enum ProfielState next_state = cur_state;
 	switch (cur_state)

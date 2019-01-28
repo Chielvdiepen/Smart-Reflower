@@ -34,6 +34,7 @@
 #include "usb/cdc_vcom.h"
 
 int Meet_Temp(void);
+void Temp_VCOM(void);
 
 #endif
 

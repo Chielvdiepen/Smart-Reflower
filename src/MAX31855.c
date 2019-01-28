@@ -1,9 +1,37 @@
-#include "MAX31855.h"
-#include <lpc_tools/GPIO_HAL.h>
-#include <lpc_tools/boardconfig.h>
+#include "board.h"
+#include "board_GPIO_ID.h"
 #include <stdio.h>
-
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <chip.h>
+#include <lpc_tools/clock.h>
+#include <lpc_tools/boardconfig.h>
+#include <lpc_tools/GPIO_HAL.h>
+#include <lpc_tools/GPIO_HAL_LPC.h>
+#include "Relais_control.h"
+#include "button.h"
+
+// timing includes
+#include <mcu_timing/delay.h>
+#include "process_time.h"
+
+// max31855 includes
+#include "MAX31855.h"
+
+// LCD includes
+#include "i2c.h"
+#include "LCD.h"
+#include "Visual_LCD.h"
+
+//PWM includes
+#include <c_utils/assert.h>
+#include <c_utils/max.h>
+#include "Buzzer_Motor.h"
+
+// USB include
+#include "usb_init.h"
 #include "usb/cdc_vcom.h"
 
 // SPI 0,0 mode: clock idles in low state
@@ -60,12 +88,22 @@ void SPI_init(void)
 }
 
 struct memory_map X, Y;
+signed int Temp_out;
+// signed int Temp_Ext1;
+// signed int Temp_Ext2;
+
+void Temp_VCOM(void)
+{
+	char waarden[100];
+	//Print data over VCOM
+	snprintf(waarden, sizeof(waarden), "%.2d:%.2d	%d	%d	%d\r\n", Total_cur_time_s() / 60, Total_cur_time_s() % 60, X.Temp_ext / 4, Y.Temp_ext / 4, Temp_out); //print of value
+	vcom_write((uint8_t *)waarden, strlen(waarden));																											  // vcom serial out
+}
 
 // main
 int Meet_Temp(void)
 {
 	uint8_t buffer[4];
-	char waardenX[100], waardenY[100];
 	SPI_init();
 
 	// Read out of SPI1, gives temp int,ext and flags
@@ -91,19 +129,12 @@ int Meet_Temp(void)
 	Y.OC = buffer[3] & (1 << 0);
 
 	//temp conversie
-	// signed int Temp_int1 = X.Temp_int / 16;
-	signed int Temp_Ext1 = X.Temp_ext / 4;
-	// signed int Temp_int2 = Y.Temp_int / 16;
-	signed int Temp_Ext2 = Y.Temp_ext / 4;
+	// // signed int Temp_int1 = X.Temp_int / 16;
+	// Temp_Ext1 = X.Temp_ext / 4;
+	// // signed int Temp_int2 = Y.Temp_int / 16;
+	// Temp_Ext2 = Y.Temp_ext / 4;
 
-	signed int Temp_out = (Temp_Ext1 + Temp_Ext2) / 2;
-
-	//Print data over VCOM
-	snprintf(waardenX, sizeof(waardenX), "Temp-ext1 = %d\r\n", Temp_Ext1);
-	vcom_write((uint8_t *)waardenX, strlen(waardenX));
-
-	snprintf(waardenY, sizeof(waardenY), "Temp-ext2 = %d\r\n", Temp_Ext2);
-	vcom_write((uint8_t *)waardenY, strlen(waardenY));
+	Temp_out = ((X.Temp_ext / 4) + (Y.Temp_ext / 4)) / 2;
 
 	const GPIO *LED_Y = board_get_GPIO(GPIO_ID_LED_Y);
 	if ((X.OC == 0) && (Y.OC == 0))
@@ -113,7 +144,7 @@ int Meet_Temp(void)
 	}
 	else
 	{
-		GPIO_HAL_set(LED_Y, LOW);	
+		GPIO_HAL_set(LED_Y, LOW);
 		return 0;
 	}
 }
