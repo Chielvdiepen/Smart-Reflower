@@ -90,6 +90,8 @@ int switch_time = 5; // display switch time, 5s
 bool display_total = false;
 bool Check_switch = true;
 int last_switch_time;
+int last_send_time;
+int Logger_flag = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*																													*/
@@ -222,10 +224,14 @@ enum ProfielState Profiel_state_End(void)
 {
 	enum ProfielState next_state = ProfielStateEnd;
 	const GPIO *pwm_RELAIS = board_get_GPIO(GPIO_ID_PWM_RELAIS);
-	const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
+	// const GPIO *LED_G = board_get_GPIO(GPIO_ID_LED_G);
 
-	GPIO_HAL_set(pwm_RELAIS, LOW);
-	End_Screen();
+	if (State_cur_time_s() == 0)
+	{
+		Logger_flag = 0;
+		GPIO_HAL_set(pwm_RELAIS, LOW);
+		End_Screen();
+	}
 
 	if (State_cur_time_s() == END_DurS)
 	{
@@ -281,15 +287,17 @@ void Display_switch(struct state *fase)
 	}
 }
 
-int last_send_time;
 void VCOM_output(void)
 {
-	if ((Total_cur_time_s() % 1) == 0)
+	if (Logger_flag == 1)
 	{
-		if (Total_cur_time_s() != last_send_time)
+		if ((Total_cur_time_s() % 1) == 0)
 		{
-			Temp_VCOM();
-			last_send_time = Total_cur_time_s();
+			if (Total_cur_time_s() != last_send_time)
+			{
+				Temp_VCOM();
+				last_send_time = Total_cur_time_s();
+			}
 		}
 	}
 }
@@ -348,6 +356,7 @@ void app_button_poll(void)
 			Total_timer_init();
 			GPIO_HAL_set(LED_R, LOW);
 			GPIO_HAL_set(LED_G, HIGH);
+			Logger_flag = 1;
 			cur_state = ProfielStatePreheat;
 			return;
 		}

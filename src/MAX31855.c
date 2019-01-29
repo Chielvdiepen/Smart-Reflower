@@ -96,7 +96,7 @@ void Temp_VCOM(void)
 {
 	char waarden[100];
 	//Print data over VCOM
-	snprintf(waarden, sizeof(waarden), "%.2d:%.2d	%d	%d	%d\r\n", Total_cur_time_s() / 60, Total_cur_time_s() % 60, X.Temp_ext / 4, Y.Temp_ext / 4, Temp_out); //print of value
+	snprintf(waarden, sizeof(waarden), "%d	%d	%d	%d\r\n", Total_cur_time_s(), X.Temp_ext / 4, Y.Temp_ext / 4, Temp_out); //print of value
 	vcom_write((uint8_t *)waarden, strlen(waarden));																											  // vcom serial out
 }
 
