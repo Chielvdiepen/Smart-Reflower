@@ -19,14 +19,14 @@ config = [0, 900, 0, 260]
 
 
 def plotvalues():
-    plt.title('Smart Reflower Data logger')
+    plt.title('Smart Reflower Data logger: Tijd: {} sec  Temp1: {}C  Temp2: {}C  Gemiddelde: {}C'.format(tijd_waarde, sensor1_temp, sensor2_temp, gemiddelde_temp))
     plt.axis(config)
     plt.grid(True)
     plt.ylabel('Temperatuur')
     plt.xlabel('Tijd')
-    plt.plot(tijd, sensor1, 'r.-', label='sensor1')
-    plt.plot(tijd, sensor2, 'b.-', label='sensor2')
-    plt.plot(tijd, gemiddelde, 'g.-', label='Gemiddelde')
+    plt.plot(tijd, sensor1, 'r-', label='sensor1')
+    plt.plot(tijd, sensor2, 'b-', label='sensor2')
+    plt.plot(tijd, gemiddelde, 'g-', label='Gemiddelde')
     plt.legend(loc='upper right')
 
 
@@ -47,6 +47,8 @@ for i in range(0, 900):
     sensor2.append(0)
     gemiddelde.append(0)
 
+ser.flushInput()
+
 while True:
     while (ser.inWaiting() == 0):
         pass
@@ -61,11 +63,12 @@ while True:
     gemiddelde_temp = int(x[3])
 
     print(tijd_waarde)
+
     tijd.append(tijd_waarde)
     sensor1.append(sensor1_temp)
     sensor2.append(sensor2_temp)
     gemiddelde.append(gemiddelde_temp)
-   except
+
     tijd.pop(0)
     sensor1.pop(0)
     sensor2.pop(0)
