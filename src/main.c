@@ -37,20 +37,20 @@
 #define CLK_FREQ (48e6)
 
 // defined durations of the reflow states in seconds
-static int PREHEAT_DurS = 180; // 180 sec
-static int SOAK_DurS = 120;	// 120 sec
-static int REFLOW_DurS = 50;   // 50 sec
-static int DWELL_DurS = 40;	// 40 sec
-static int COOLDOWN_DurS = 60; // 60 sec
+static int PREHEAT_DurS = 200; // 200 sec
+static int SOAK_DurS = 180;	// 180 sec
+static int REFLOW_DurS = 100;   // 100 sec
+static int DWELL_DurS = 50;	// 50 sec
+static int COOLDOWN_DurS = 70; // 60 sec
 static int END_DurS = 30;
-static int TOTAL_DurS = 450;
+static int TOTAL_DurS = 600;
 
 // defined temperatures of the reflow states in Celsius
 static int Begin_temp = 20;
 static int PREHEAT_temp = 150;  // 150 C
 static int SOAK_temp = 200;		// 200 C
 static int REFLOW_temp = 230;   // 230 C
-static int DWELL_temp = 255;	// 255 c
+static int DWELL_temp = 250;	// 250 c
 static int COOLDOWN_temp = 100; // 100 C
 static int TOTAL_temp = 0;
 
@@ -144,7 +144,7 @@ enum ProfielState Profiel_state_Soak(void)
 	enum ProfielState next_state = ProfielStateSoak;
 
 	Control_Relais(setpoint_calc(&SOAK));
-	progressbar_run(&SOAK);
+	Display_switch(&SOAK);
 
 	if ((State_cur_time_s() >= SOAK_DurS) && (temp_check(&SOAK) == false))
 	{
@@ -164,7 +164,7 @@ enum ProfielState Profiel_state_Reflow(void)
 	enum ProfielState next_state = ProfielStateReflow;
 
 	Control_Relais(setpoint_calc(&REFLOW));
-	progressbar_run(&REFLOW);
+	Display_switch(&REFLOW);
 
 	if ((State_cur_time_s() >= REFLOW_DurS) && (temp_check(&REFLOW) == false))
 	{
@@ -184,7 +184,7 @@ enum ProfielState Profiel_state_Dwell(void)
 	enum ProfielState next_state = ProfielStateDwell;
 
 	Control_Relais(setpoint_calc(&DWELL));
-	progressbar_run(&DWELL);
+	Display_switch(&DWELL);
 
 	if ((State_cur_time_s() >= DWELL_DurS) && (temp_check(&DWELL) == false))
 	{
@@ -204,7 +204,7 @@ enum ProfielState Profiel_state_Cooldown(void)
 	enum ProfielState next_state = ProfielStateCooldown;
 
 	Control_Relais(setpoint_calc(&COOLDOWN));
-	progressbar_run(&COOLDOWN);
+	Display_switch(&COOLDOWN);
 
 	if ((State_cur_time_s() >= COOLDOWN_DurS) && (temp_check(&COOLDOWN) == false))
 	{
