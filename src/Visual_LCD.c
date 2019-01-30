@@ -122,7 +122,9 @@ char *relais_state(char *Relais_status)
 
 void Start_Screen(void)
 {
-    LCD_write_string(" Jitter Electronics ");
+    char buffer1[100];
+    snprintf(buffer1, sizeof(buffer1), "  Jitter   Temp:%3dC", Meet_Temp()); // percentage progress berekening
+    LCD_write_string(buffer1);
     LCD_write_string("   Smart-Reflower   ");
     LCD_write_string("  Press the Button  ");
     LCD_write_string("To Begin The Process");
