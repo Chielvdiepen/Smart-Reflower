@@ -15,7 +15,7 @@ cnt = 0
 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 ser.flushInput()
 
-config = [0, 900, 0, 260]
+config = [0, 900, 0, 280]
 
 
 def plotvalues():
